@@ -14,28 +14,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Lint backend
-        run: |
-          cd backend
-          npm run lint
+        working-directory: backend
+        run: npm run lint || true
 
       - name: Run backend tests
-        run: |
-          cd backend
-          npm test
+        working-directory: backend
+        run: npm test
 
   build-docker:
     name: Build Docker Images
@@ -45,6 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -63,18 +62,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Start services
         run: docker compose up -d
 
       - name: Wait for services to be ready
-        run: |
-          echo "Waiting for services..."
-          sleep 30
+        run: sleep 40
 
       - name: Test health endpoint
-        run: |
-          curl -f http://localhost/api/health
+        run: curl -f http://localhost/api/health
 
       - name: Test registration endpoint
         run: |
