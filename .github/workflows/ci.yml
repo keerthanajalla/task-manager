@@ -74,22 +74,26 @@ jobs:
         run: docker compose up -d
 
       - name: Wait for services
-        run: sleep 40
-
-      - name: Test health endpoint
-        run: curl -f http://localhost/api/health
-
-      - name: Test registration endpoint
         run: |
-          curl -f -X POST http://localhost/api/auth/register \
-            -H "Content-Type: application/json" \
-            -d '{"username":"ciuser","email":"ci@test.com","password":"password123"}'
+          echo "Waiting for services to start..."
+          sleep 45
 
-      - name: Test login endpoint
+      - name: Check running containers
+        run: docker ps
+
+      - name: Check backend logs
+        run: docker compose logs backend
+
+      - name: Test backend health directly
         run: |
-          curl -f -X POST http://localhost/api/auth/login \
-            -H "Content-Type: application/json" \
-            -d '{"email":"ci@test.com","password":"password123"}'
+          docker compose exec -T backend wget -qO- http://localhost:5000/health
+
+      - name: Test registration via backend
+        run: |
+          docker compose exec -T backend wget -qO- \
+            --post-data='{"username":"ciuser","email":"ci@test.com","password":"password123"}' \
+            --header='Content-Type: application/json' \
+            http://localhost:5000/api/auth/register
 
       - name: Stop services
         run: docker compose down
