@@ -4,7 +4,6 @@ const app = require('../src/app');
 let token;
 
 beforeAll(async () => {
-  // Register and login to get token
   await request(app)
     .post('/api/auth/register')
     .send({
