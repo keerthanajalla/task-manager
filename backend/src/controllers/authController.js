@@ -8,6 +8,11 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Username, email and password are required' });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
@@ -46,6 +51,11 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
 
     // Find user
     const user = await User.findOne({ where: { email } });
